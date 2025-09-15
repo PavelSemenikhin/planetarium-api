@@ -60,9 +60,13 @@ class PlanetariumDome(models.Model):
 
     def clean(self):
         if self.rows < 1:
-            raise ValidationError({"rows": "Number of rows must be at least 1"})
+            raise ValidationError(
+                {"rows": "Number of rows must be at least 1"}
+            )
         if self.seats_in_row < 1:
-            raise ValidationError({"seats_in_row": "Number of seats must be at least 1"})
+            raise ValidationError(
+                {"seats_in_row": "Number of seats must be at least 1"}
+            )
 
 
 class ShowSession(models.Model):
@@ -79,7 +83,6 @@ class ShowSession(models.Model):
 
     class Meta:
         ordering = ["-show_time"]
-
 
     def __str__(self):
         return (f"{self.astronomy_show.title} "
@@ -133,16 +136,19 @@ class Ticket(models.Model):
             if not (1 <= ticket_attr_value <= count_attrs):
                 raise error_to_raise(
                     {
-                        ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be in available range: "
-                                          f"(1, {cinema_hall_attr_name}): "
-                                          f"(1, {count_attrs})"
+                        ticket_attr_name:
+                            f"{ticket_attr_name} "
+                            f"number must be in available range: "
+                            f"(1, {cinema_hall_attr_name}): "
+                            f"(1, {count_attrs})"
                     }
                 )
 
     def clean(self):
         if self.show_session.show_time < timezone.now():
-            raise ValidationError({"show_session": "Cannot book a ticket for a past session."})
+            raise ValidationError(
+                {"show_session": "Cannot book a ticket for a past session."}
+            )
 
         if Ticket.objects.filter(
                 show_session=self.show_session,
