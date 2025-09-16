@@ -6,4 +6,5 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    pass
+    ordering = ("email",)
+    list_display = ("id", "email", "is_staff")

@@ -41,6 +41,10 @@ class PlanetariumDomeSerializer(serializers.ModelSerializer):
 
 class AstronomyShowSerializer(serializers.ModelSerializer):
     """Base serializer used for creating AstronomyShow instances."""
+    themes = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=ShowTheme.objects.all()
+    )
 
     class Meta:
         model = AstronomyShow
@@ -135,6 +139,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    """Serializer for creating and validating Ticket instances."""
 
     class Meta:
         model = Ticket
@@ -142,6 +147,7 @@ class TicketSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     def validate(self, attrs):
+        """Validate row and seat for the given planetarium dome."""
         Ticket.validate_ticket(
             attrs["row"],
             attrs["seat"],
@@ -152,6 +158,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class ReservationSerializer(serializers.ModelSerializer):
+    """Serializer for creating Reservation instances with nested Tickets."""
     user = serializers.SlugRelatedField(read_only=True, slug_field="username")
     tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
 
@@ -160,6 +167,8 @@ class ReservationSerializer(serializers.ModelSerializer):
         fields = ("id", "user", "created_at", "tickets")
 
     def create(self, validated_data):
+        """Create reservation and associated tickets
+        within atomic transaction."""
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
             reservation = Reservation.objects.create(**validated_data)
@@ -169,4 +178,5 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class ReservationListSerializer(ReservationSerializer):
+    """Serializer for listing Reservation instances with nested Tickets."""
     tickets = TicketSerializer(many=True, read_only=True)
