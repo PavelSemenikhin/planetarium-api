@@ -1,6 +1,10 @@
+import os
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 from config.settings import AUTH_USER_MODEL
 
@@ -20,6 +24,13 @@ class Presenter(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+def show_poster_file_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads/shows/", filename)
+
+
 class AstronomyShow(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -33,6 +44,11 @@ class AstronomyShow(models.Model):
         null=True,
         blank=True,
         related_name="shows"
+    )
+    poster = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to=show_poster_file_path
     )
 
     def __str__(self):
@@ -83,6 +99,16 @@ class ShowSession(models.Model):
 
     class Meta:
         ordering = ["-show_time"]
+
+    @property
+    def available_seats(self) -> int:
+        total = self.planetarium_dome.capacity
+        taken = self.tickets.count()
+        return total - taken
+
+    @property
+    def is_full(self) -> bool:
+        return self.available_seats == 0
 
     def __str__(self):
         return (f"{self.astronomy_show.title} "

@@ -65,16 +65,45 @@ class ShowSessionViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = (ShowSession.objects
-                .select_related(
-                    "astronomy_show__presenter", "planetarium_dome")
-                .prefetch_related("tickets")
-                )
+    queryset = (
+        ShowSession.objects.select_related(
+            "astronomy_show",
+            "astronomy_show__presenter",
+            "planetarium_dome",
+        )
+    )
     serializer_class = ShowSessionSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+    @staticmethod
+    def _params_to_ints(qs):
+        """Converts a list of string IDs to a list of integers"""
+        return [int(str_id) for str_id in qs.split(",")]
+
     def get_queryset(self):
-        return self.queryset
+        """Retrieve the sessions with optional filters."""
+        queryset = super().get_queryset()
+
+        theme = self.request.query_params.get("theme")
+        show_time = self.request.query_params.get("show_time")
+        title = self.request.query_params.get("title")
+
+        if theme:
+            queryset = queryset.filter(
+                astronomy_show__themes__name__icontains=theme
+            )
+
+        if show_time:
+            queryset = queryset.filter(
+                show_time__date=show_time
+            )
+
+        if title:
+            queryset = queryset.filter(
+                astronomy_show__title__icontains=title
+            )
+
+        return queryset.distinct()
 
     def get_serializer_class(self):
         if self.action == "list":

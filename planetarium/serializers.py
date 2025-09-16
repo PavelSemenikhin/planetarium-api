@@ -48,7 +48,14 @@ class AstronomyShowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AstronomyShow
-        fields = ("id", "title", "description", "themes", "presenter")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "themes",
+            "presenter",
+            "poster"
+        )
 
 
 class AstronomyShowListSerializer(AstronomyShowSerializer):
@@ -73,10 +80,18 @@ class AstronomyShowDetailSerializer(AstronomyShowSerializer):
     about an AstronomyShow."""
     themes = ShowThemeSerializer(many=True, read_only=True)
     presenter = PresenterSerializer(read_only=True)
+    poster = serializers.ImageField(read_only=True)
 
     class Meta:
         model = AstronomyShow
-        fields = ("id", "title", "description", "themes", "presenter")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "themes",
+            "presenter",
+            "poster"
+        )
 
 
 class PresenterFromShowMixin:
@@ -116,6 +131,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
     astronomy_show = AstronomyShowListSerializer(read_only=True)
     planetarium_dome = PlanetariumDomeSerializer(read_only=True)
     taken_seats = serializers.SerializerMethodField()
+    is_full = serializers.BooleanField(source="is_full", read_only=True)
 
     class Meta:
         model = ShowSession
@@ -126,6 +142,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
             "presenter",
             "taken_places",
             "taken_seats",
+            "is_full",
         )
 
     def get_taken_places(self, obj):
