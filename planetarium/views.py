@@ -1,7 +1,7 @@
 
 from rest_framework import viewsets, mixins
 
-from planetarium.models import AstronomyShow, PlanetariumDome, ShowSession
+from planetarium.models import AstronomyShow, PlanetariumDome, ShowSession, Reservation, ShowTheme
 from planetarium.serializers import (
     AstronomyShowSerializer,
     AstronomyShowListSerializer,
@@ -9,7 +9,7 @@ from planetarium.serializers import (
     PlanetariumDomeSerializer,
     ShowSessionSerializer,
     ShowSessionListSerializer,
-    ShowSessionDetailSerializer
+    ShowSessionDetailSerializer, ReservationSerializer, ReservationListSerializer, ShowThemeSerializer
 )
 
 
@@ -23,7 +23,7 @@ class AstronomyShowViewSet(
                 .select_related("presenter")
                 .prefetch_related("themes"))
     serializer_class = AstronomyShowSerializer
-    permission_classes = ...
+    permission_classes = []
 
     def get_queryset(self):
         return (AstronomyShow.objects
@@ -38,14 +38,14 @@ class AstronomyShowViewSet(
         return AstronomyShowSerializer
 
 
-class PlanetariumShowViewSet(
+class PlanetariumDomeViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
     queryset = PlanetariumDome.objects.all()
     serializer_class = PlanetariumDomeSerializer
-    permission_classes = ...
+    permission_classes = []
 
 
 class ShowSessionViewSet(
@@ -59,7 +59,7 @@ class ShowSessionViewSet(
                 .prefetch_related("tickets")
                 )
     serializer_class = ShowSessionSerializer
-    permission_classes = ...
+    permission_classes = []
 
     def get_queryset(self):
         return self.queryset
@@ -70,3 +70,36 @@ class ShowSessionViewSet(
         if self.action == "retrieve":
             return ShowSessionDetailSerializer
         return ShowSessionSerializer
+
+
+class ReservationViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Reservation.objects.prefetch_related(
+        "tickets__show_session__astronomy_show",
+        "tickets__show_session__planetarium_dome"
+    )
+    serializer_class = ReservationSerializer
+    permission_classes = []
+    def get_queryset(self):
+        return Reservation.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ReservationListSerializer
+        return ReservationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class ShowThemeViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = ShowTheme.objects.all()
+    serializer_class = ShowThemeSerializer
+    permission_classes = []
