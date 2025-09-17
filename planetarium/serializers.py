@@ -97,7 +97,8 @@ class AstronomyShowDetailSerializer(AstronomyShowSerializer):
 class PresenterFromShowMixin:
     """Mixin for retrieving the presenter's full name
     from the related AstronomyShow."""
-    presenter = serializers.SerializerMethodField()
+    presenter = serializers.CharField(
+        source="astronomy_show.presenter.full_name", read_only=True)
 
     def get_presenter(self, obj):
         return obj.astronomy_show.presenter.full_name \
@@ -109,6 +110,10 @@ class ShowSessionSerializer(
     serializers.ModelSerializer
 ):
     """Base serializer used for creating ShowSession instances."""
+    presenter = serializers.CharField(
+        source="astronomy_show.presenter.full_name",
+        read_only=True)
+
     astronomy_show = serializers.SlugRelatedField(
         read_only=True,
         slug_field="title"
@@ -131,7 +136,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
     astronomy_show = AstronomyShowListSerializer(read_only=True)
     planetarium_dome = PlanetariumDomeSerializer(read_only=True)
     taken_seats = serializers.SerializerMethodField()
-    is_full = serializers.BooleanField(source="is_full", read_only=True)
+    is_full = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = ShowSession
