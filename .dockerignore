@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Env & Secrets
+.env
+.venv/
+*.sqlite3
+*.db
+*.log
+
+# OS-specific
+.DS_Store
+__MACOSX/
+
+# IDEs & Editors
+.vscode/
+.idea/
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+*.coverage
+
+# Node
+node_modules/
+
+# Git
+.git/
+
+# Static & Media
+files/media/
+files/static/
+
+# Docker
+*.pid
+*.sock
+docker-compose.override.yml
