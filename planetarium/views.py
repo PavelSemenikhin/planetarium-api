@@ -46,7 +46,7 @@ class AstronomyShowViewSet(
             return AstronomyShowListSerializer
         if self.action == "retrieve":
             return AstronomyShowDetailSerializer
-        return AstronomyShowSerializer
+        return self.serializer_class
 
 
 class PlanetariumDomeViewSet(
@@ -110,7 +110,7 @@ class ShowSessionViewSet(
             return ShowSessionListSerializer
         if self.action == "retrieve":
             return ShowSessionDetailSerializer
-        return ShowSessionSerializer
+        return self.serializer_class
 
 
 class ReservationViewSet(
@@ -132,7 +132,7 @@ class ReservationViewSet(
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
             return ReservationListSerializer
-        return ReservationSerializer
+        return self.serializer_class
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

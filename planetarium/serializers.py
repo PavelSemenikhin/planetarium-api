@@ -154,10 +154,7 @@ class ShowSessionDetailSerializer(ShowSessionSerializer):
         return obj.tickets.count()
 
     def get_taken_seats(self, obj):
-        return [
-            {"row": ticket.row, "seat": ticket.seat}
-            for ticket in obj.tickets.all()
-        ]
+        return list(obj.tickets.values("row", "seat"))
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -182,7 +179,7 @@ class TicketSerializer(serializers.ModelSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     """Serializer for creating Reservation instances with nested Tickets."""
     user = serializers.SlugRelatedField(read_only=True, slug_field="username")
-    tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
+    tickets = TicketSerializer(many=True,)
 
     class Meta:
         model = Reservation
