@@ -28,6 +28,8 @@ db.sqlite3-journal
 media/
 staticfiles/
 .env
+.env.dev
+.env.prod
 
 # Unit test / coverage reports
 .coverage
@@ -65,3 +67,15 @@ dmypy.json
 
 # Sphinx docs
 docs/_build/
+
+# Migrations cache
+*/migrations/__pycache__/
+
+# Editors
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+
+static/
